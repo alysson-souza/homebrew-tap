@@ -61,10 +61,14 @@ class Mpv < Formula
       --lua=luajit
     ]
 
+    inreplace "TOOLS/dylib-unhell.py", "libraries(lib, result)", "lib = lib.replace(\"@loader_path\", \"" + "#{HOMEBREW_PREFIX}/lib" + "\"); libraries(lib, result)"
+
     python3 = "python3.10"
     system python3, "bootstrap.py"
     system python3, "waf", "configure", *args
     system python3, "waf", "install"
+    system python3, "TOOLS/osxbundle.py", "build/mpv"
+    prefix.install "build/mpv.app"    
   end
 
   test do
