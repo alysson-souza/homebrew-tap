@@ -4,7 +4,7 @@ class Dav1d < Formula
     url "https://code.videolan.org/videolan/dav1d/-/archive/1.0.0/dav1d-1.0.0.tar.bz2"
     sha256 "4a4eb6cecbc8c26916ef58886d478243de8bcc46710b369c04d6891b0155ac0f"
     license "BSD-2-Clause"
-    head "https://code.videolan.org/videolan/dav1d.git", branch: master 
+    head "https://code.videolan.org/videolan/dav1d.git", branch: "master"
   
     depends_on "meson" => :build
     depends_on "ninja" => :build
