@@ -61,6 +61,8 @@ class Mpv < Formula
       --lua=luajit
     ]
 
+    args << "--swift-flags=-O -whole-module-optimization -target-cpu native"
+
     inreplace "TOOLS/dylib-unhell.py", "libraries(lib, result)", "lib = lib.replace(\"@loader_path\", \"" + "#{HOMEBREW_PREFIX}/lib" + "\"); libraries(lib, result)"
 
     python3 = "python3.10"
