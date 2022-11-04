@@ -109,6 +109,16 @@ class Ffmpeg < Formula
   
       args << "--enable-videotoolbox"
       args << "--enable-neon" if Hardware::CPU.arm?
+
+      args << "--enable-hardcoded-tables"
+      args << "--enable-lto"
+      args << "--optflags=-Ofast"
+
+      opts  = Hardware::CPU.arm? ? "-mcpu=native " : "-march=native -mtune=native "
+      args << ("--extra-cflags="    + opts)
+      args << ("--extra-cxxflags="  + opts)
+      args << ("--extra-objcflags=" + opts)
+      args << ("--extra-ldflags="   + opts)
   
       system "./configure", *args
       system "make", "install"
