@@ -1,0 +1,136 @@
+name: Sync Latest Release
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Check weekly on Sunday
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-and-build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Get latest release from upstream
+      id: upstream
+      run: |
+        LATEST=$(curl -sL https://api.github.com/repos/qarmin/czkawka/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        echo "tag=$LATEST" >> $GITHUB_OUTPUT
+        echo "Latest upstream release: $LATEST"
+        
+    - name: Check if we already have this release
+      id: check_local
+      run: |
+        LOCAL_LATEST=$(curl -sL https://api.github.com/repos/alysson-souza/homebrew-tap/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        echo "local_tag=$LOCAL_LATEST" >> $GITHUB_OUTPUT
+        echo "Latest local release: $LOCAL_LATEST"
+        
+    - name: Build DMG if new release available
+      if: steps.upstream.outputs.tag != steps.check_local.outputs.local_tag
+      run: |
+        echo "New version available: ${{ steps.upstream.outputs.tag }}"
+        
+    - name: Checkout Czkawka repository
+      if: steps.upstream.outputs.tag != steps.check_local.outputs.local_tag
+      uses: actions/checkout@v4
+      with:
+        repository: qarmin/czkawka
+        ref: ${{ steps.upstream.outputs.tag }}
+        
+    - name: Install Rust
+      if: steps.upstream.outputs.tag != steps.check_local.outputs.local_tag
+      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      
+    - name: Build krokiet
+      if: steps.upstream.outputs.tag != steps.check_local.outputs.local_tag
+      run: |
+        source $HOME/.cargo/env
+        cargo build --release --bin krokiet
+      
+    - name: Create DMG
+      if: steps.upstream.outputs.tag != steps.check_local.outputs.local_tag
+      run: |
+        APP_NAME="Krokiet"
+        VERSION="${{ steps.upstream.outputs.tag }}"
+        BINARY_NAME="krokiet"
+        
+        # Create app bundle structure
+        mkdir -p "${APP_NAME}.app/Contents/MacOS"
+        mkdir -p "${APP_NAME}.app/Contents/Resources"
+        
+        # Copy binary
+        cp "target/release/${BINARY_NAME}" "${APP_NAME}.app/Contents/MacOS/"
+        
+        # Create Info.plist
+        cat > "${APP_NAME}.app/Contents/Info.plist" << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleDevelopmentRegion</key>
+            <string>en</string>
+            <key>CFBundleExecutable</key>
+            <string>${BINARY_NAME}</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.github.qarmin.krokiet</string>
+            <key>CFBundleInfoDictionaryVersion</key>
+            <string>6.0</string>
+            <key>CFBundleName</key>
+            <string>${APP_NAME}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${VERSION#v}</string>
+            <key>CFBundleVersion</key>
+            <string>${VERSION#v}</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.11</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+        </dict>
+        </plist>
+        EOF
+        
+        # Create icon from available resources
+        if [ -f "krokiet/icons/krokiet_logo.png" ]; then
+          mkdir -p AppIcon.iconset
+          sips -z 16 16     "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_16x16.png
+          sips -z 32 32     "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_16x16@2x.png
+          sips -z 32 32     "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_32x32.png
+          sips -z 64 64     "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_32x32@2x.png
+          sips -z 128 128   "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_128x128.png
+          sips -z 256 256   "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_128x128@2x.png
+          sips -z 256 256   "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_256x256.png
+          sips -z 512 512   "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_256x256@2x.png
+          sips -z 512 512   "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_512x512.png
+          sips -z 1024 1024 "krokiet/icons/krokiet_logo.png" --out AppIcon.iconset/icon_512x512@2x.png
+          iconutil -c icns AppIcon.iconset
+          cp AppIcon.icns "${APP_NAME}.app/Contents/Resources/"
+          rm -rf AppIcon.iconset AppIcon.icns
+        fi
+        
+        # Create DMG with generic name for latest
+        mkdir -p dmg_staging
+        cp -R "${APP_NAME}.app" dmg_staging/
+        ln -s /Applications dmg_staging/Applications
+        hdiutil create -volname "${APP_NAME}" -srcfolder dmg_staging -ov -format UDZO "Krokiet-macos.dmg"
+        rm -rf dmg_staging
+        
+        echo "DMG created: Krokiet-macos.dmg"
+        ls -lh "Krokiet-macos.dmg"
+        
+    - name: Create GitHub Release
+      if: steps.upstream.outputs.tag != steps.check_local.outputs.local_tag
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.upstream.outputs.tag }}
+        name: Krokiet ${{ steps.upstream.outputs.tag }}
+        body: |
+          Automated DMG build for Krokiet ${{ steps.upstream.outputs.tag }}
+
+          Built from: https://github.com/qarmin/czkawka/releases/tag/${{ steps.upstream.outputs.tag }}
+        files: Krokiet-macos.dmg
+        generate_release_notes: false
+    
