@@ -17,7 +17,16 @@ cask "krokiet" do
 
   auto_updates true
 
-  app "Krokiet.app"
+  container type: :dmg
+
+  app "Krokiet.app", target: "Krokiet.app"
+
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-cr", "#{appdir}/Krokiet.app"],
+                   must_succeed: false,
+                   print_stderr: false
+  end
 
   zap trash: [
     "~/Library/Application Support/pl.Qarmin.Krokiet",
