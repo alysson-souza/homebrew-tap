@@ -2,43 +2,51 @@
 
 Personal Homebrew tap with various formulas and casks.
 
-## Available Packages
+## Available packages
 
-### Casks (CLI/HEAD)
+### Czkawka
 
-Currently includes formulas for the [Czkawka project](https://github.com/qarmin/czkawka):
+Formulas and a Krokiet cask from the
+[Czkawka project](https://github.com/qarmin/czkawka).
 
-**Krokiet (GUI):**
-```bash
-brew tap alysson-souza/homebrew-tap
-brew install --cask krokiet
+Install the Krokiet app:
+
+```fish
+brew tap alysson-souza/tap
+brew install --cask alysson-souza/tap/krokiet
 ```
 
-**CLI Tools:**
-```bash
-brew tap alysson-souza/homebrew-tap
-brew install --HEAD czkawka-cli
-brew install --HEAD czkawka-gui
+Build the CLI or GTK GUI from source:
+
+```fish
+brew install --HEAD alysson-souza/tap/czkawka-cli
+brew install --HEAD alysson-souza/tap/czkawka-gui
 ```
 
-## Usage
+### mpv
 
-```bash
-# Add the tap
-brew tap alysson-souza/homebrew-tap
+Builds mpv from upstream HEAD, including `mpv.app`. Requires macOS and Xcode.
 
-# Install packages
-brew install --cask krokiet
-brew upgrade --cask krokiet
+```fish
+brew install --HEAD alysson-souza/tap/mpv
+ln -s (brew --prefix alysson-souza/tap/mpv)/mpv.app /Applications/mpv.app
 ```
+
+## Updating
+
+```fish
+brew upgrade --cask alysson-souza/tap/krokiet
+brew upgrade --fetch-HEAD alysson-souza/tap/mpv
+```
+
+Use `--fetch-HEAD` for the Czkawka source formulas too.
 
 ## License
 
-This Homebrew tap (formulas and casks) is licensed under the [MIT License](LICENSE).
+This Homebrew tap is licensed under the [MIT License](LICENSE).
+Individual packages retain their upstream licenses.
 
-Individual packages have their own licenses specified in their respective formulas/casks.
+## Upstream projects
 
-## Upstream Projects
-
-- Krokiet: https://github.com/qarmin/czkawka
-# Workflow trigger
+- [Czkawka and Krokiet](https://github.com/qarmin/czkawka)
+- [mpv](https://github.com/mpv-player/mpv)

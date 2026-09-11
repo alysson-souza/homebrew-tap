@@ -1,17 +1,17 @@
 class Krokiet < Formula
-  desc "Modern GUI application to find duplicates, similar images, and more"
-  homepage "https://github.com/qarmin/czkawka"
-  head "https://github.com/qarmin/czkawka.git", branch: "master"
+  desc 'Modern GUI application to find duplicates, similar images, and more'
+  homepage 'https://github.com/qarmin/czkawka'
+  head 'https://github.com/qarmin/czkawka.git', branch: 'master'
 
-  depends_on "rust" => :build
+  depends_on 'rust' => :build
 
   def install
-    system "cargo", "install", *std_cargo_args(path: "krokiet")
+    system 'cargo', 'install', *std_cargo_args(path: 'krokiet')
 
     # Create macOS app bundle
-    app_name = "Krokiet"
+    app_name = 'Krokiet'
     app_bundle = "#{app_name}.app"
-    bin_name = "krokiet"
+    bin_name = 'krokiet'
 
     # Build the app bundle structure
     mkdir_p "#{app_bundle}/Contents/MacOS"
@@ -65,6 +65,6 @@ class Krokiet < Formula
   end
 
   test do
-    system "#{bin}/krokiet", "--help"
+    system "#{bin}/krokiet", '--help'
   end
 end

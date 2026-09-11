@@ -1,17 +1,17 @@
-cask "krokiet" do
+cask 'krokiet' do
   version :latest
   sha256 :no_check
 
-  url "https://github.com/alysson-souza/homebrew-tap/releases/latest/download/Krokiet-macos.dmg",
-      verified: "github.com/alysson-souza/homebrew-tap/"
-  name "Krokiet"
-  desc "Modern GUI application to find duplicates, similar images, and more"
-  homepage "https://github.com/qarmin/czkawka"
+  url 'https://github.com/alysson-souza/homebrew-tap/releases/latest/download/Krokiet-macos.dmg',
+      verified: 'github.com/alysson-souza/homebrew-tap/'
+  name 'Krokiet'
+  desc 'Modern GUI application to find duplicates, similar images, and more'
+  homepage 'https://github.com/qarmin/czkawka'
 
   livecheck do
-    url "https://api.github.com/repos/alysson-souza/homebrew-tap/releases/latest"
+    url 'https://api.github.com/repos/alysson-souza/homebrew-tap/releases/latest'
     strategy :json do |json|
-      json["tag_name"]
+      json['tag_name']
     end
   end
 
@@ -19,18 +19,18 @@ cask "krokiet" do
 
   container type: :dmg
 
-  app "Krokiet.app", target: "Krokiet.app"
+  app 'Krokiet.app', target: 'Krokiet.app'
 
   postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/Krokiet.app"],
+    system_command '/usr/bin/xattr',
+                   args: ['-cr', "#{appdir}/Krokiet.app"],
                    must_succeed: false,
                    print_stderr: false
   end
 
   zap trash: [
-    "~/Library/Application Support/pl.Qarmin.Krokiet",
-    "~/Library/Caches/pl.Qarmin.Czkawka",
-    "~/.config/krokiet",
+    '~/Library/Application Support/pl.Qarmin.Krokiet',
+    '~/Library/Caches/pl.Qarmin.Czkawka',
+    '~/.config/krokiet',
   ]
 end
