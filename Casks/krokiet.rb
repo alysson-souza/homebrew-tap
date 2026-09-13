@@ -2,8 +2,7 @@ cask 'krokiet' do
   version :latest
   sha256 :no_check
 
-  url 'https://github.com/alysson-souza/homebrew-tap/releases/latest/download/Krokiet-macos.dmg',
-      verified: 'github.com/alysson-souza/homebrew-tap/'
+  url 'https://github.com/alysson-souza/homebrew-tap/releases/latest/download/Krokiet-macos.dmg'
   name 'Krokiet'
   desc 'Modern GUI application to find duplicates, similar images, and more'
   homepage 'https://github.com/qarmin/czkawka'
@@ -21,11 +20,11 @@ cask 'krokiet' do
 
   app 'Krokiet.app', target: 'Krokiet.app'
 
-  postflight do
-    system_command '/usr/bin/xattr',
-                   args: ['-cr', "#{appdir}/Krokiet.app"],
-                   must_succeed: false,
-                   print_stderr: false
+  postflight_steps do
+    run '/usr/bin/xattr',
+        args: ['-cr', '{{appdir}}/Krokiet.app'],
+        must_succeed: false,
+        print_stderr: false
   end
 
   zap trash: [
